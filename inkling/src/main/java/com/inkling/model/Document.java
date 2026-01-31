@@ -1,12 +1,16 @@
 package com.inkling.model;
 
 import io.quarkus.hibernate.orm.panache.PanacheEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "documents")
@@ -25,6 +29,9 @@ public class Document extends PanacheEntity {
 
     @Enumerated(EnumType.STRING)
     public Status status;
+
+    @OneToMany(mappedBy = "document", cascade = CascadeType.ALL, orphanRemoval = true)
+    public List<DocumentChunk> chunks = new ArrayList<>();
 
     public enum Status {
         PENDING,    // Just uploaded, not yet processed
