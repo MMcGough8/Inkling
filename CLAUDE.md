@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Inkling is a RAG (Retrieval-Augmented Generation) document assistant built with Quarkus. Users upload documents (PDF, TXT, MD), which are parsed, chunked, and embedded into vectors. Users can then ask questions and receive AI-generated answers grounded in their documents.
 
-**Current Status:** Scaffolding phase with placeholder code. Core RAG features not yet implemented.
+**Current Status:** Core RAG pipeline implemented (entities, DTOs, services). REST endpoints and tests pending.
 
 ## Build and Run Commands
 
@@ -47,13 +47,26 @@ All commands run from the `inkling/` directory.
 
 ```
 com.inkling/
-├── *Resource.java           # REST endpoints (JAX-RS with @Path, @GET, @POST)
-├── service/                 # Business logic
+├── dto/                     # Data Transfer Objects for REST API
+│   ├── DocumentDTO.java     # Document response (from() factory method)
+│   ├── ChatRequest.java     # Chat input (question, documentIds, sessionId)
+│   ├── ChatResponse.java    # Chat output (answer, sources, sessionId)
+│   └── SourceReference.java # Citation info (documentId, snippet, score)
 ├── model/                   # JPA entities (extend PanacheEntity)
-└── ai/                      # LangChain4j integration
+│   ├── Document.java        # Uploaded file metadata + status enum
+│   └── DocumentChunk.java   # Text chunk with embeddingId link to pgvector
+├── service/                 # Business logic
+│   ├── DocumentService.java # Tika parsing, CRUD operations
+│   ├── EmbeddingService.java# Chunking, OpenAI embeddings, pgvector storage
+│   └── RAGService.java      # Similarity search, prompt building, LLM calls
+└── *Resource.java           # REST endpoints (JAX-RS with @Path, @GET, @POST)
 ```
 
 **Data flow:** Document upload → Tika parsing → Text chunking → OpenAI embedding → pgvector storage → Similarity search → LLM response
+
+**Key relationships:**
+- Document → DocumentChunk: OneToMany with cascade delete
+- DocumentChunk.embeddingId → pgvector embeddings table: links chunk to vector
 
 ## Configuration
 
@@ -94,28 +107,28 @@ public class DocumentResource {
 ## Development Roadmap
 
 ### Phase 1: Cleanup
-- Remove placeholder code (GreetingResource, MyEntity, and their tests)
+- [x] ~~Remove placeholder code (GreetingResource, MyEntity, and their tests)~~ (pending)
 
-### Phase 2: Data Model
-- Create Document entity (name, contentType, size, uploadedAt, status)
-- Create DocumentChunk entity (document ManyToOne, content, chunkIndex, embeddingId)
-- Create DTOs (DocumentDTO, ChatRequest, ChatResponse, SourceReference)
+### Phase 2: Data Model ✅
+- [x] Document entity (name, contentType, size, uploadedAt, status enum)
+- [x] DocumentChunk entity (document ManyToOne, content, chunkIndex, embeddingId)
+- [x] DTOs (DocumentDTO, ChatRequest, ChatResponse, SourceReference)
 
-### Phase 3: Services
-- DocumentService: Parse documents with Apache Tika, save to database
-- EmbeddingService: Chunk text, generate embeddings via OpenAI, store in pgvector
-- RAGService: Query similar chunks, build prompt, get LLM response
+### Phase 3: Services ✅
+- [x] DocumentService: Tika parsing, CRUD, status management
+- [x] EmbeddingService: Chunking with overlap, OpenAI embeddings, pgvector storage
+- [x] RAGService: Similarity search, prompt building, LLM response generation
 
-### Phase 4: REST Endpoints
-- DocumentResource: POST/GET/DELETE /api/documents
-- ChatResource: POST /api/chat for Q&A
+### Phase 4: REST Endpoints (next)
+- [ ] DocumentResource: POST/GET/DELETE /api/documents
+- [ ] ChatResource: POST /api/chat for Q&A
 
 ### Phase 5: Testing
-- Unit tests for services (Tika parsing, entity creation)
-- Integration tests for REST endpoints
+- [ ] Unit tests for services
+- [ ] Integration tests for REST endpoints
 
 ### Phase 6: Enhancements
-- Conversation memory (multi-turn chat with session history)
-- Streaming responses (SSE for real-time token streaming)
-- Global exception handling
-- Frontend UI
+- [ ] Conversation memory (multi-turn chat with session history)
+- [ ] Streaming responses (SSE for real-time token streaming)
+- [ ] Global exception handling
+- [ ] Frontend UI
