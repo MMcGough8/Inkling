@@ -106,8 +106,8 @@ public class DocumentResource {
 
 ## Development Roadmap
 
-### Phase 1: Cleanup
-- [x] ~~Remove placeholder code (GreetingResource, MyEntity, and their tests)~~ (pending)
+### Phase 1: Cleanup ✅
+- [x] Remove placeholder code (GreetingResource, MyEntity, and their tests)
 
 ### Phase 2: Data Model ✅
 - [x] Document entity (name, contentType, size, uploadedAt, status enum)
