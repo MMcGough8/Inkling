@@ -1,6 +1,9 @@
 package com.inkling;
 
 import com.inkling.dto.DocumentDTO;
+import com.inkling.exception.DocumentNotFoundException;
+import com.inkling.exception.DocumentProcessingException;
+import com.inkling.exception.ValidationException;
 import com.inkling.model.Document;
 import com.inkling.service.DocumentService;
 import com.inkling.service.DocumentService.DocumentParseResult;
@@ -42,9 +45,7 @@ public class DocumentResource {
     @Consumes(MediaType.MULTIPART_FORM_DATA)
     public Response upload(@RestForm("file") FileUpload file) {
         if (file == null) {
-            return Response.status(Response.Status.BAD_REQUEST)
-                    .entity(new ErrorResponse("No file provided"))
-                    .build();
+            throw new ValidationException("No file provided");
         }
 
         try (InputStream inputStream = Files.newInputStream(file.uploadedFile())) {
@@ -64,13 +65,7 @@ public class DocumentResource {
                     .build();
 
         } catch (IOException e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Failed to read uploaded file: " + e.getMessage()))
-                    .build();
-        } catch (Exception e) {
-            return Response.status(Response.Status.INTERNAL_SERVER_ERROR)
-                    .entity(new ErrorResponse("Failed to process document: " + e.getMessage()))
-                    .build();
+            throw new DocumentProcessingException("Failed to read uploaded file", e);
         }
     }
 
@@ -90,14 +85,12 @@ public class DocumentResource {
      */
     @GET
     @Path("/{id}")
-    public Response get(@PathParam("id") Long id) {
+    public DocumentDTO get(@PathParam("id") Long id) {
         Document doc = documentService.findById(id);
         if (doc == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(new ErrorResponse("Document not found: " + id))
-                    .build();
+            throw new DocumentNotFoundException(id);
         }
-        return Response.ok(DocumentDTO.from(doc)).build();
+        return DocumentDTO.from(doc);
     }
 
     /**
@@ -108,9 +101,7 @@ public class DocumentResource {
     public Response delete(@PathParam("id") Long id) {
         Document doc = documentService.findById(id);
         if (doc == null) {
-            return Response.status(Response.Status.NOT_FOUND)
-                    .entity(new ErrorResponse("Document not found: " + id))
-                    .build();
+            throw new DocumentNotFoundException(id);
         }
 
         // Delete embeddings from pgvector first
@@ -121,9 +112,4 @@ public class DocumentResource {
 
         return Response.noContent().build();
     }
-
-    /**
-     * Simple error response wrapper.
-     */
-    public record ErrorResponse(String error) {}
 }
