@@ -7,16 +7,20 @@ import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingStore;
+import com.inkling.exception.DocumentProcessingException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import jakarta.transaction.Transactional;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
+import org.jboss.logging.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @ApplicationScoped
 public class EmbeddingService {
+
+    private static final Logger LOG = Logger.getLogger(EmbeddingService.class);
 
     @Inject
     EmbeddingModel embeddingModel;
@@ -35,43 +39,52 @@ public class EmbeddingService {
 
     /**
      * Process a document: chunk the text, generate embeddings, and store everything.
+     *
+     * @throws DocumentProcessingException if embedding generation or storage fails
      */
     @Transactional
     public void processDocument(Document document, String extractedText) {
-        try {
-            document.status = Status.PROCESSING;
+        document.status = Status.PROCESSING;
 
-            // Split text into chunks
-            List<String> chunks = chunkText(extractedText);
+        // Split text into chunks
+        List<String> chunks = chunkText(extractedText);
 
-            // Process each chunk
-            for (int i = 0; i < chunks.size(); i++) {
-                String chunkContent = chunks.get(i);
+        // Process each chunk
+        for (int i = 0; i < chunks.size(); i++) {
+            String chunkContent = chunks.get(i);
 
-                // Generate embedding via OpenAI
-                Embedding embedding = embeddingModel.embed(chunkContent).content();
+            // Generate embedding via OpenAI
+            Embedding embedding = embeddingModel.embed(chunkContent).content();
 
-                // Store in pgvector, get back the ID
-                TextSegment segment = TextSegment.from(chunkContent);
-                String embeddingId = embeddingStore.add(embedding, segment);
+            // Store in pgvector, get back the ID
+            TextSegment segment = TextSegment.from(chunkContent);
+            String embeddingId = embeddingStore.add(embedding, segment);
 
-                // Create and persist the chunk entity
-                DocumentChunk chunk = new DocumentChunk();
-                chunk.document = document;
-                chunk.content = chunkContent;
-                chunk.chunkIndex = i;
-                chunk.embeddingId = embeddingId;
-                chunk.persist();
+            // Create and persist the chunk entity
+            DocumentChunk chunk = new DocumentChunk();
+            chunk.document = document;
+            chunk.content = chunkContent;
+            chunk.chunkIndex = i;
+            chunk.embeddingId = embeddingId;
+            chunk.persist();
 
-                // Keep both sides of relationship in sync
-                document.chunks.add(chunk);
-            }
+            // Keep both sides of relationship in sync
+            document.chunks.add(chunk);
+        }
 
-            document.status = Status.READY;
+        document.status = Status.READY;
+        LOG.infof("Successfully processed document '%s' with %d chunks", document.name, chunks.size());
+    }
 
-        } catch (Exception e) {
+    /**
+     * Mark a document as failed (called from a separate transaction when processing fails).
+     */
+    @Transactional
+    public void markDocumentFailed(Long documentId) {
+        Document document = Document.findById(documentId);
+        if (document != null) {
             document.status = Status.FAILED;
-            throw new RuntimeException("Failed to process document: " + document.name, e);
+            LOG.warnf("Marked document '%s' as FAILED", document.name);
         }
     }
 

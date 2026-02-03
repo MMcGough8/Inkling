@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Inkling is a RAG (Retrieval-Augmented Generation) document assistant built with Quarkus. Users upload documents (PDF, TXT, MD), which are parsed, chunked, and embedded into vectors. Users can then ask questions and receive AI-generated answers grounded in their documents.
 
-**Current Status:** Core RAG pipeline implemented (entities, DTOs, services). REST endpoints and tests pending.
+**Current Status:** Fully functional RAG application with REST API, frontend UI, conversation memory, and global exception handling. Ready for use.
 
 ## Build and Run Commands
 
@@ -51,15 +51,31 @@ com.inkling/
 │   ├── DocumentDTO.java     # Document response (from() factory method)
 │   ├── ChatRequest.java     # Chat input (question, documentIds, sessionId)
 │   ├── ChatResponse.java    # Chat output (answer, sources, sessionId)
-│   └── SourceReference.java # Citation info (documentId, snippet, score)
+│   ├── SourceReference.java # Citation info (documentId, snippet, score)
+│   └── ErrorResponse.java   # Standardized error format
+├── exception/               # Global exception handling
+│   ├── ValidationException.java
+│   ├── DocumentNotFoundException.java
+│   ├── DocumentProcessingException.java
+│   └── *ExceptionMapper.java # Convert exceptions to HTTP responses
 ├── model/                   # JPA entities (extend PanacheEntity)
 │   ├── Document.java        # Uploaded file metadata + status enum
-│   └── DocumentChunk.java   # Text chunk with embeddingId link to pgvector
+│   ├── DocumentChunk.java   # Text chunk with embeddingId link to pgvector
+│   ├── ChatSession.java     # Conversation session tracking
+│   └── ChatMessage.java     # Individual chat messages (USER/ASSISTANT)
 ├── service/                 # Business logic
 │   ├── DocumentService.java # Tika parsing, CRUD operations
 │   ├── EmbeddingService.java# Chunking, OpenAI embeddings, pgvector storage
 │   └── RAGService.java      # Similarity search, prompt building, LLM calls
-└── *Resource.java           # REST endpoints (JAX-RS with @Path, @GET, @POST)
+├── DocumentResource.java    # REST: POST/GET/DELETE /api/documents
+├── ChatResource.java        # REST: POST /api/chat
+└── PageResource.java        # Serves frontend HTML via Qute
+
+src/main/resources/
+├── templates/index.html     # Main frontend page (Qute template)
+└── META-INF/resources/
+    ├── css/styles.css       # Frontend styling
+    └── js/main.js           # Frontend JavaScript
 ```
 
 **Data flow:** Document upload → Tika parsing → Text chunking → OpenAI embedding → pgvector storage → Similarity search → LLM response
@@ -119,16 +135,29 @@ public class DocumentResource {
 - [x] EmbeddingService: Chunking with overlap, OpenAI embeddings, pgvector storage
 - [x] RAGService: Similarity search, prompt building, LLM response generation
 
-### Phase 4: REST Endpoints (next)
-- [ ] DocumentResource: POST/GET/DELETE /api/documents
-- [ ] ChatResource: POST /api/chat for Q&A
+### Phase 4: REST Endpoints ✅
+- [x] DocumentResource: POST/GET/DELETE /api/documents
+- [x] ChatResource: POST /api/chat for Q&A
 
-### Phase 5: Testing
-- [ ] Unit tests for services
-- [ ] Integration tests for REST endpoints
+### Phase 5: Testing ✅
+- [x] Unit tests for DocumentService, EmbeddingService
+- [x] Integration tests for DocumentResource, ChatResource
+- [ ] Unit tests for RAGService (pending)
 
-### Phase 6: Enhancements
-- [ ] Conversation memory (multi-turn chat with session history)
-- [ ] Streaming responses (SSE for real-time token streaming)
-- [ ] Global exception handling
-- [ ] Frontend UI
+### Phase 6: Enhancements ✅
+- [x] Conversation memory (ChatSession, ChatMessage entities)
+- [ ] Streaming responses (SSE) - skipped for now
+- [x] Global exception handling (custom exceptions + mappers)
+- [x] Frontend UI (Qute + vanilla JS, dark theme)
+
+### Learning Resources Created
+- `Quarkus_Model_Basics.md` - JPA entities and Panache
+- `OneToMany_&_ManyToOne_Quarkus_Basics.md` - Entity relationships
+- `Quarkus_DTO_Basics.md` - Data Transfer Objects
+- `Quarkus_Services_&_RAG_Pipeline.md` - Service layer and RAG
+- `Quarkus_REST_Endpoints_Basics.md` - JAX-RS REST APIs
+- `Quarkus_Testing_Basics.md` - Testing with JUnit and mocking
+- `Quarkus_Conversation_Memory.md` - Multi-turn chat implementation
+- `Quarkus_Exception_Handling.md` - Global exception handling
+- `Quarkus_Frontend_Basics.md` - Qute templates and JavaScript
+- `Docker_Basics_for_Quarkus.md` - Docker and Dev Services

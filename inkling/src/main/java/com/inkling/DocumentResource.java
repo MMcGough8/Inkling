@@ -50,9 +50,11 @@ public class DocumentResource {
             throw new ValidationException("No file provided");
         }
 
+        DocumentParseResult result = null;
+
         try (InputStream inputStream = Files.newInputStream(file.uploadedFile())) {
             // Parse document and save entity
-            DocumentParseResult result = documentService.processUpload(
+            result = documentService.processUpload(
                     file.fileName(),
                     file.contentType(),
                     Files.size(file.uploadedFile()),
@@ -70,6 +72,12 @@ public class DocumentResource {
             throw new DocumentProcessingException("Failed to read uploaded file", e);
         } catch (TikaException e) {
             throw new DocumentProcessingException("Failed to parse document", e);
+        } catch (Exception e) {
+            // Mark document as failed in a separate transaction
+            if (result != null && result.document() != null) {
+                embeddingService.markDocumentFailed(result.document().id);
+            }
+            throw new DocumentProcessingException("Failed to process document", e);
         }
     }
 
