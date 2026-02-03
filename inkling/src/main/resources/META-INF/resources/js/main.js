@@ -66,13 +66,41 @@ function setupUpload() {
 }
 
 async function uploadFile(file) {
-    // Validate file type
-    const validTypes = ['application/pdf', 'text/plain', 'text/markdown'];
-    const validExtensions = ['.pdf', '.txt', '.md'];
+    // Validate file type - Apache Tika supports all of these
+    const validTypes = [
+        // PDF
+        'application/pdf',
+        // Plain text
+        'text/plain',
+        'text/markdown',
+        'text/csv',
+        'text/html',
+        'text/xml',
+        'application/json',
+        // Microsoft Office
+        'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+        'application/vnd.ms-excel',
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/vnd.ms-powerpoint',
+        'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+        // OpenDocument
+        'application/vnd.oasis.opendocument.text',
+        'application/vnd.oasis.opendocument.spreadsheet',
+        'application/vnd.oasis.opendocument.presentation',
+        // Other
+        'application/rtf',
+        'application/epub+zip'
+    ];
+    const validExtensions = [
+        '.pdf', '.txt', '.md', '.csv', '.html', '.htm', '.xml', '.json',
+        '.doc', '.docx', '.xls', '.xlsx', '.ppt', '.pptx',
+        '.odt', '.ods', '.odp', '.rtf', '.epub'
+    ];
     const hasValidExtension = validExtensions.some(ext => file.name.toLowerCase().endsWith(ext));
 
     if (!validTypes.includes(file.type) && !hasValidExtension) {
-        showToast('Please upload a PDF, TXT, or MD file', 'error');
+        showToast('Unsupported file type. Try PDF, DOCX, TXT, or other document formats.', 'error');
         return;
     }
 
