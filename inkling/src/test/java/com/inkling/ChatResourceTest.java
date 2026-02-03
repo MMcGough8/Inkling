@@ -62,7 +62,8 @@ class ChatResourceTest {
                 .post("/api/chat")
             .then()
                 .statusCode(400)
-                .body("error", containsString("required"));
+                .body("error", is("Bad Request"))
+                .body("message", containsString("required"));
     }
 
     @Test
@@ -74,7 +75,8 @@ class ChatResourceTest {
                 .post("/api/chat")
             .then()
                 .statusCode(400)
-                .body("error", containsString("required"));
+                .body("error", is("Bad Request"))
+                .body("message", containsString("required"));
     }
 
     @Test
@@ -86,7 +88,8 @@ class ChatResourceTest {
                 .post("/api/chat")
             .then()
                 .statusCode(400)
-                .body("error", containsString("required"));
+                .body("error", is("Bad Request"))
+                .body("message", containsString("required"));
     }
 
     @Test

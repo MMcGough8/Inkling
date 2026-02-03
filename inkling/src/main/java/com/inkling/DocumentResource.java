@@ -21,6 +21,8 @@ import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.reactive.multipart.FileUpload;
 import org.jboss.resteasy.reactive.RestForm;
 
+import org.apache.tika.exception.TikaException;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -66,6 +68,8 @@ public class DocumentResource {
 
         } catch (IOException e) {
             throw new DocumentProcessingException("Failed to read uploaded file", e);
+        } catch (TikaException e) {
+            throw new DocumentProcessingException("Failed to parse document", e);
         }
     }
 

@@ -108,7 +108,8 @@ class DocumentResourceTest {
                 .get("/api/documents/99999")
             .then()
                 .statusCode(404)
-                .body("error", containsString("not found"));
+                .body("error", is("Not Found"))
+                .body("message", containsString("not found"));
     }
 
     @Test
@@ -118,7 +119,8 @@ class DocumentResourceTest {
                 .delete("/api/documents/99999")
             .then()
                 .statusCode(404)
-                .body("error", containsString("not found"));
+                .body("error", is("Not Found"))
+                .body("message", containsString("not found"));
     }
 
     @Test
