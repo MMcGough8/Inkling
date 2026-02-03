@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inkling - Document Assistant</title>
+    <link rel="stylesheet" href="/css/styles.css"/>
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <!-- Toast Container -->
+    <div id="toast-container"></div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <svg class="logo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 19l7-7 3 3-7 7-3-3z"></path>
+                    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z"></path>
+                    <path d="M2 2l7.586 7.586"></path>
+                    <circle cx="11" cy="11" r="2"></circle>
+                </svg>
+                <span class="logo-text">Inkling</span>
+            </div>
+            <p class="tagline">AI-powered document assistant</p>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Sidebar: Documents -->
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <h2>Documents</h2>
+                    <span class="doc-count" id="doc-count">0</span>
+                </div>
+
+                <!-- Upload Area -->
+                <div class="upload-area" id="upload-area">
+                    <input type="file" id="file-input" accept=".pdf,.txt,.md" hidden>
+                    <div class="upload-content">
+                        <svg class="upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                        <p class="upload-text">Drop files here or click to upload</p>
+                        <p class="upload-hint">PDF, TXT, MD supported</p>
+                    </div>
+                    <div class="upload-progress" id="upload-progress">
+                        <div class="progress-bar"></div>
+                        <span class="progress-text">Uploading...</span>
+                    </div>
+                </div>
+
+                <!-- Document List -->
+                <div class="document-list" id="document-list">
+                    <!-- Documents will be loaded here -->
+                </div>
+            </aside>
+
+            <!-- Chat Area -->
+            <section class="chat-section">
+                <!-- Chat Messages -->
+                <div class="chat-messages" id="chat-messages">
+                    <div class="welcome-message">
+                        <svg class="welcome-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                            <path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                        </svg>
+                        <h3>Welcome to Inkling</h3>
+                        <p>Upload documents and ask questions about them. I'll find relevant information and provide accurate answers.</p>
+                        <div class="welcome-tips">
+                            <div class="tip">
+                                <span class="tip-number">1</span>
+                                <span>Upload your documents (PDF, TXT, MD)</span>
+                            </div>
+                            <div class="tip">
+                                <span class="tip-number">2</span>
+                                <span>Ask questions in natural language</span>
+                            </div>
+                            <div class="tip">
+                                <span class="tip-number">3</span>
+                                <span>Get answers with source citations</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chat Input -->
+                <div class="chat-input-container">
+                    <form id="chat-form" class="chat-form">
+                        <input type="text"
+                               id="chat-input"
+                               class="chat-input"
+                               placeholder="Ask a question about your documents..."
+                               autocomplete="off">
+                        <button type="submit" class="send-button" id="send-button">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <line x1="22" y1="2" x2="11" y2="13"></line>
+                                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="/js/main.js"></script>
+</body>
+</html>

@@ -76,6 +76,12 @@
             <artifactId>quarkus-langchain4j-pgvector</artifactId>
         </dependency>
 
+        <!-- Qute templating for frontend -->
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-rest-qute</artifactId>
+        </dependency>
+
         <!-- Apache Tika for document parsing -->
         <dependency>
             <groupId>org.apache.tika</groupId>
